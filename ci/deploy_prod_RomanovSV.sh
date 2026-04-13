@@ -9,6 +9,10 @@ if [[ -z "${DEPLOY_DIR:-}" ]]; then
   echo "Deploy_prod_RomanovSV: DEPLOY_DIR unset, skipping."
   exit 0
 fi
+if [[ ! -d "$DEPLOY_DIR" ]]; then
+  echo "Deploy_prod_RomanovSV: каталога нет на агенте ($DEPLOY_DIR), пропуск deploy." >&2
+  exit 0
+fi
 : "${JWT_SECRET:?Set JWT_SECRET when deploying}"
 export EXAM_IMAGE="${EXAM_IMAGE:-romanovsv2/exam}"
 cd "$DEPLOY_DIR"
