@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT"
-: "${DOCKERHUB_USER:?Set DOCKERHUB_USER}"
-: "${IMAGE_TAG:=latest}"
-docker push "${DOCKERHUB_USER}/railway_backend_romanovsv:${IMAGE_TAG}"
-docker push "${DOCKERHUB_USER}/railway_frontend_romanovsv:${IMAGE_TAG}"
+EXAM_IMAGE="${EXAM_IMAGE:-romanovsv2/exam}"
+PW="${DOCKERHUB_PASSWORD:-}"
+if [[ -n "$PW" && "$PW" != "REPLACE_IN_TEAMCITY_UI" ]]; then
+  : "${DOCKERHUB_USER:?Set DOCKERHUB_USER when DOCKERHUB_PASSWORD is set}"
+  echo "$PW" | docker login -u "$DOCKERHUB_USER" --password-stdin
+fi
+docker push "${EXAM_IMAGE}:backend"
+docker push "${EXAM_IMAGE}:frontend"
