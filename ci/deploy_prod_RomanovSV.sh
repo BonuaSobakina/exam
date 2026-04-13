@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Зелёный Main без деплоя: env.SKIP_DEPLOY_PROD=true (например нет каталога на агенте).
+if [[ "${SKIP_DEPLOY_PROD:-}" == "true" ]]; then
+  echo "SKIP_DEPLOY_PROD=true — шаг deploy пропущен." >&2
+  exit 0
+fi
 if [[ -z "${DEPLOY_DIR:-}" ]]; then
   echo "Deploy_prod_RomanovSV: DEPLOY_DIR unset, skipping."
   exit 0

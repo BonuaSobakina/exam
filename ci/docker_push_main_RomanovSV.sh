@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 EXAM_IMAGE="${EXAM_IMAGE:-romanovsv2/exam}"
+# Временно зелёный Main без push (например токен Hub только Read): env.SKIP_DOCKER_PUSH=true в TeamCity.
+if [[ "${SKIP_DOCKER_PUSH:-}" == "true" ]]; then
+  echo "SKIP_DOCKER_PUSH=true — push в Hub пропущен (соберите Write-токен и снимите флаг)." >&2
+  exit 0
+fi
 PW="${DOCKERHUB_PASSWORD:-}"
 # В TeamCity без логина Hub всегда будет denied на push.
 if [[ -n "${TEAMCITY_VERSION:-}" ]]; then
@@ -22,9 +27,9 @@ fi
 push_one() {
   local tag=$1
   if ! docker push "$tag"; then
-    echo >&2 "Push отклонён для $tag (denied: обычно токен без Write или неверный DOCKERHUB_USER)."
-    echo >&2 "В Hub: Account → Security → Access Token с правами Read/Write; пользователь = владелец репозитория ${EXAM_IMAGE%%/*}."
-    echo >&2 "В TeamCity: env.DOCKERHUB_USER должен совпадать с логином Hub, под которым создан токен."
+    echo >&2 "Push отклонён для $tag. Если выше было «insufficient scopes» — PAT только Read; нужен токен с Read & Write."
+    echo >&2 "Временный обход: в TeamCity env.SKIP_DOCKER_PUSH=true (зелёная сборка без push)."
+    echo >&2 "Hub: Account Settings → Security → New Access Token; TC: env.DOCKERHUB_USER + env.DOCKERHUB_PASSWORD."
     exit 1
   fi
 }
