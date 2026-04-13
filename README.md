@@ -63,8 +63,8 @@ docker compose -f docker-compose.teamcity.yml up -d
 
 ## Ветки
 
-- **`main`** — базовый функционал без поля «вагон» в ответе API.
-- **`feature/wagon-RomanovSV`** — дополнение по билету: в ответе `/api/me/seat` добавляется `wagon_number`.
+- **`main`** — базовый функционал: ответ `/api/me/seat` содержит место и поезд **без** `wagon_number`.
+- **`feature/wagon-RomanovSV`** — дополнение по билету: миграция `002_wagon_romanovsv`, в ответе API поле **`wagon_number`**, фронтенд показывает вагон при наличии поля.
 
 ## CI-скрипты (RomanovSV)
 

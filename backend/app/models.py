@@ -24,3 +24,4 @@ class Ticket(Base):
     passport_series: Mapped[str] = mapped_column(String(32), nullable=False)
     train_number: Mapped[int] = mapped_column(Integer, nullable=False)
     seat_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    wagon_number: Mapped[int] = mapped_column(Integer, nullable=False)

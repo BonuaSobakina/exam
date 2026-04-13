@@ -26,6 +26,7 @@ class SeatOut(BaseModel):
     full_name: str
     train_number: int
     seat_number: int
+    wagon_number: int
 
     model_config = {"from_attributes": True}
 

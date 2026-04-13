@@ -34,6 +34,7 @@ async def test_login_and_seat(client: AsyncClient) -> None:
     body = r2.json()
     assert body["seat_number"] == 15
     assert body["train_number"] == 2
+    assert body.get("wagon_number") == 5
 
 
 @pytest.mark.asyncio

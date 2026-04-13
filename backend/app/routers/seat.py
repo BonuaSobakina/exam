@@ -24,4 +24,5 @@ async def my_seat(
         full_name=ticket.full_name,
         train_number=ticket.train_number,
         seat_number=ticket.seat_number,
+        wagon_number=ticket.wagon_number,
     )

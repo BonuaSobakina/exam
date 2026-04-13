@@ -48,6 +48,7 @@ async def prepare_db() -> AsyncGenerator[None, None]:
                     passport_series="4518",
                     train_number=2,
                     seat_number=15,
+                    wagon_number=5,
                 ),
             ]
         )
