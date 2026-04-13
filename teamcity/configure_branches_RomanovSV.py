@@ -25,9 +25,8 @@ BT_FEATURE = "FeatureBuildRomanovSV"
 
 # Только для VCS root с Feature в id (не трогаем Git_Main — иначе ломается default main).
 BRANCH_SPEC = "+:refs/heads/feature/*"
-# Main — только main; Feature — пусто (не режем логические имена вида wagon-RomanovSV / feature/...).
-# И main, и default-ветка (логическое имя в TC может отличаться).
-FILTER_MAIN = "+:main\n+:<default>"
+# Main — main/master и default (логическое имя в TC может отличаться).
+FILTER_MAIN = "+:main\n+:<default>\n+:master"
 FILTER_FEATURE = ""
 
 
@@ -232,7 +231,7 @@ def main() -> None:
         except urllib.error.HTTPError as e:
             print("очистка branchFilter Feature:", e.code)
 
-    patch_vcs_triggers(BT_MAIN, "+:main\n+:<default>")
+    patch_vcs_triggers(BT_MAIN, "+:main\n+:<default>\n+:master")
     patch_vcs_triggers(BT_FEATURE, "+:feature/*")
 
     warn_if_no_vcs(BT_MAIN)
