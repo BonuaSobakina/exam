@@ -1,0 +1,40 @@
+# Prod stack: pull images from Docker Hub (no local build). Copy .env with JWT_SECRET on the server.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: railway_db_RomanovSV
+    environment:
+      POSTGRES_USER: railway
+      POSTGRES_PASSWORD: railway
+      POSTGRES_DB: railway
+    volumes:
+      - pgdata_RomanovSV:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U railway -d railway"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ${DOCKERHUB_USER}/railway_backend_RomanovSV:${IMAGE_TAG:-latest}
+    container_name: railway_backend_RomanovSV
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://railway:railway@db:5432/railway
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: http://localhost,http://127.0.0.1,http://frontend
+    expose:
+      - "8000"
+
+  frontend:
+    image: ${DOCKERHUB_USER}/railway_frontend_RomanovSV:${IMAGE_TAG:-latest}
+    container_name: railway_frontend_RomanovSV
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_RomanovSV:

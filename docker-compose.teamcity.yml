@@ -1,0 +1,29 @@
+# TeamCity Server + Agent on the same host as prod (exam requirement).
+# Start: docker compose -f docker-compose.teamcity.yml up -d
+# UI: http://localhost:8111 — complete setup wizard, install Docker support on the agent.
+services:
+  teamcity-server:
+    image: jetbrains/teamcity-server:2024.07.3
+    container_name: teamcity_server_RomanovSV
+    ports:
+      - "${TEAMCITY_PORT:-8111}:8111"
+    volumes:
+      - teamcity_data_RomanovSV:/data/teamcity_server/datadir
+      - teamcity_logs_RomanovSV:/opt/teamcity/logs
+
+  teamcity-agent:
+    image: jetbrains/teamcity-agent:2024.07.3
+    container_name: teamcity_agent_RomanovSV
+    environment:
+      SERVER_URL: http://teamcity-server:8111
+      AGENT_NAME: agent_RomanovSV
+    volumes:
+      - teamcity_agent_RomanovSV:/data/teamcity_agent/system
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - teamcity-server
+
+volumes:
+  teamcity_data_RomanovSV:
+  teamcity_logs_RomanovSV:
+  teamcity_agent_RomanovSV:

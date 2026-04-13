@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: railway_db_RomanovSV
+    environment:
+      POSTGRES_USER: railway
+      POSTGRES_PASSWORD: railway
+      POSTGRES_DB: railway
+    volumes:
+      - pgdata_RomanovSV:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U railway -d railway"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: railway_backend_RomanovSV:build
+    build:
+      context: ./backend
+      dockerfile: Dockerfile_RomanovSV
+    container_name: railway_backend_RomanovSV
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://railway:railway@db:5432/railway
+      JWT_SECRET: ${JWT_SECRET:-change-me-romanovsv}
+      CORS_ORIGINS: http://localhost,http://127.0.0.1,http://frontend
+    expose:
+      - "8000"
+
+  frontend:
+    image: railway_frontend_RomanovSV:build
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend_RomanovSV
+    container_name: railway_frontend_RomanovSV
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_RomanovSV:
