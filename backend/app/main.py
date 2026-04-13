@@ -7,13 +7,15 @@ from app.routers import auth, departures, seat
 app = FastAPI(title="Railway RomanovSV", version="1.0.0")
 
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_kw: dict = {
+    "allow_origins": origins,
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if settings.cors_origin_regex.strip():
+    cors_kw["allow_origin_regex"] = settings.cors_origin_regex.strip()
+app.add_middleware(CORSMiddleware, **cors_kw)
 
 app.include_router(departures.router)
 app.include_router(auth.router)

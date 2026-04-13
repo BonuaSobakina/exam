@@ -1,96 +1,37 @@
-# Железнодорожная компания — экзамен, билет №7 (RomanovSV)
+# ЖД-компания, билет №7 (RomanovSV)
 
-Монорепозиторий: **FastAPI** + **PostgreSQL** + **React (Vite)**. Аутентификация по паре «номер билета + серия паспорта», JWT.
+FastAPI + PostgreSQL + React (Vite). Вход: номер билета + серия паспорта → JWT.
 
-## Запуск локально (без Docker)
+**Ветки:** `main` — без вагона; `feature/wagon-RomanovSV` — в ответе места есть `wagon_number`.
 
-1. PostgreSQL и переменные из [.env.example](.env.example) → `.env` в корне или только для backend.
-2. Backend:
-
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-export DATABASE_URL=postgresql+asyncpg://USER:PASS@localhost:5432/railway
-export PYTHONPATH=.
-alembic upgrade head
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-3. Frontend: `cd frontend && npm install && npm run dev` — прокси на API в [vite.config.ts](frontend/vite.config.ts).
-
-## Docker (dev-сборка)
-
-Из корня репозитория:
+**Локально / Docker**
 
 ```bash
-cp .env.example .env
-# задайте JWT_SECRET в .env при необходимости
 docker compose up --build
 ```
 
-Приложение: **http://localhost** (порт задайте `FRONTEND_PORT` при конфликте с TeamCity `8111`).
+Фронт по умолчанию порт 80, иначе `FRONTEND_PORT=8080`. Prod: `docker-compose.prod.yml`.
 
-## Docker Hub + prod
+**API:** `GET /api/departures`, `POST /api/auth/login`, `GET /api/me/seat` (Bearer).
 
-Сборка помечает образы именами `railway_backend_RomanovSV` и `railway_frontend_RomanovSV`. Для публикации:
+**TeamCity:** `docker compose -f docker-compose.teamcity.yml up -d`
 
-```bash
-export DOCKERHUB_USER=<ваш_логин>
-export IMAGE_TAG=latest
-bash ci/docker_build_main_RomanovSV.sh
-docker login
-bash ci/docker_push_main_RomanovSV.sh
-```
+**Проверка без TeamCity (как на агенте):** из корня `railway-app` выполнить `bash ci/verify_all_RomanovSV.sh` — прогоняет тот же pipeline, что Feature + сборка образов main. Сам сервер TC здесь не поднимается; если REST не пускает, попробуйте `TC_URL=http://хост:8111/httpAuth`.
 
-На сервере положите [docker-compose.prod.yml](docker-compose.prod.yml) и `.env`:
+**Docker Hub:** `romanovsv2/exam:backend` и `romanovsv2/exam:frontend`. Локально: `export EXAM_IMAGE=romanovsv2/exam`, `docker login`, затем `ci/docker_build_main_RomanovSV.sh` и `ci/docker_push_main_RomanovSV.sh`.
 
-```env
-DOCKERHUB_USER=<логин>
-IMAGE_TAG=latest
-JWT_SECRET=<длинная_случайная_строка>
-```
+**TeamCity:** шаги — **Command Line** (`simpleRunner`), вызывают `ci/tc_*` и `ci/docker_*`. Обновить шаги (с любой машины с Python, где доступен REST сервера):
 
-Запуск: `docker compose -f docker-compose.prod.yml up -d`.
+`TC_URL=http://ВАШ_ХОСТ:8111 TC_USER=… TC_PASSWORD=… python3 teamcity/seed_python_build_steps_RomanovSV.py`
 
-## TeamCity
+Скрипт в конце печатает `type='simpleRunner'` по каждому шагу. **Если в логе сборки шаг подписан «(Python)» и ошибка `Python executable key must be not empty`** — для **Feature** сначала выполните (самый надёжный вариант — один шаг Command Line):
 
-```bash
-docker compose -f docker-compose.teamcity.yml up -d
-```
+`TC_URL=http://ВАШ_ХОСТ:8111 TC_USER=… TC_PASSWORD=… python3 teamcity/fix_feature_build_RomanovSV.py`
 
-Детали конфигураций сборки: [teamcity/README_RomanovSV.md](teamcity/README_RomanovSV.md).
+Затем перезапустите сборку; в логе должен быть шаг **`Feature_pipeline_RomanovSV (Command Line)`**. Иначе общий сидер: `teamcity/seed_python_build_steps_RomanovSV.py` (Feature теперь тоже один pipeline-шаг).
 
-## Ветки
+Параметры Hub: `python3 teamcity/apply_dockerhub_teamcity_RomanovSV.py`. В проекте: `env.EXAM_IMAGE`, `env.DOCKERHUB_USER`, `env.DOCKERHUB_PASSWORD` (обязательно для push).
 
-- **`main`** — базовый функционал: ответ `/api/me/seat` содержит место и поезд **без** `wagon_number`.
-- **`feature/wagon-RomanovSV`** — дополнение по билету: миграция `002_wagon_romanovsv`, в ответе API поле **`wagon_number`**, фронтенд показывает вагон при наличии поля.
+**Если feature-ветка не собирается:** в Git VCS root должна быть **Branch specification** (например `+:refs/heads/feature/*`), иначе TeamCity не видит ветки кроме default. Автонастройка: `TC_USER=… TC_PASSWORD=… python3 teamcity/configure_branches_RomanovSV.py` (ветки + фильтры Main/Feature + VCS trigger). Для **Run** у Feature-сборки выберите ветку `feature/...` в списке.
 
-## CI-скрипты (RomanovSV)
-
-| Скрипт | Назначение |
-|--------|------------|
-| [ci/lint_RomanovSV.sh](ci/lint_RomanovSV.sh) | ruff + eslint |
-| [ci/sast_RomanovSV.sh](ci/sast_RomanovSV.sh) | bandit |
-| [ci/test_RomanovSV.sh](ci/test_RomanovSV.sh) | pytest + vitest |
-| [ci/docker_build_main_RomanovSV.sh](ci/docker_build_main_RomanovSV.sh) | build + теги для Hub |
-| [ci/docker_push_main_RomanovSV.sh](ci/docker_push_main_RomanovSV.sh) | push образов |
-| [ci/docker_build_feature_RomanovSV.sh](ci/docker_build_feature_RomanovSV.sh) | только build |
-| [ci/deploy_prod_RomanovSV.sh](ci/deploy_prod_RomanovSV.sh) | prod pull + up |
-
-## Публичный репозиторий
-
-После создания репозитория на GitHub/GitLab добавьте remote и вставьте ссылку в отчёт:
-
-```bash
-git remote add origin <URL>
-git push -u origin main
-```
-
-## API
-
-- `GET /api/departures` — расписание (без авторизации).
-- `POST /api/auth/login` — тело `{ "ticket_number", "passport_series" }` → `access_token`.
-- `GET /api/me/seat` — заголовок `Authorization: Bearer <token>`.
-
-Тестовые данные билетов см. миграцию `backend/alembic/versions/001_initial_romanovsv.py`.
+**Пустой Docker Hub:** образы пушит только конфигурация **Main** (`MainProdRomanovSV`), не Feature. Нужна успешная сборка **main** и заданный **`env.DOCKERHUB_PASSWORD`** (токен с правом push). Локально: `docker login` и скрипты `ci/docker_build_main_RomanovSV.sh` + `ci/docker_push_main_RomanovSV.sh`.

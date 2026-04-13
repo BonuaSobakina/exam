@@ -1,6 +1,5 @@
-# TeamCity Server + Agent on the same host as prod (exam requirement).
-# Start: docker compose -f docker-compose.teamcity.yml up -d
-# UI: http://localhost:8111 — complete setup wizard, install Docker support on the agent.
+# TeamCity Server + Agent. UI: http://localhost:8111
+# Если агент не видит Docker: на хосте временно `chmod 666 /var/run/docker.sock` или group_add с GID сокета.
 services:
   teamcity-server:
     image: jetbrains/teamcity-server:2024.07.3
@@ -14,6 +13,9 @@ services:
   teamcity-agent:
     image: jetbrains/teamcity-agent:2024.07.3
     container_name: teamcity_agent_RomanovSV
+    # GID группы сокета на хосте (stat -c '%g' /var/run/docker.sock), иначе permission denied.
+    group_add:
+      - "${DOCKER_SOCK_GID:-1001}"
     environment:
       SERVER_URL: http://teamcity-server:8111
       AGENT_NAME: agent_RomanovSV

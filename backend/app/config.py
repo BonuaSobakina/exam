@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
     cors_origins: str = "http://localhost:5173,http://localhost:80,http://localhost"
+    cors_origin_regex: str = ""
 
 
 settings = Settings()
