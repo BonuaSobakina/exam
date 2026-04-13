@@ -15,7 +15,7 @@ services:
       retries: 10
 
   backend:
-    image: railway_backend_RomanovSV:build
+    image: railway_backend_romanovsv:build
     build:
       context: ./backend
       dockerfile: Dockerfile_RomanovSV
@@ -31,7 +31,7 @@ services:
       - "8000"
 
   frontend:
-    image: railway_frontend_RomanovSV:build
+    image: railway_frontend_romanovsv:build
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend_RomanovSV
