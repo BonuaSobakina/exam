@@ -16,7 +16,7 @@ services:
       retries: 10
 
   backend:
-    image: ${DOCKERHUB_USER}/railway_backend_RomanovSV:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_USER}/railway_backend_romanovsv:${IMAGE_TAG:-latest}
     container_name: railway_backend_RomanovSV
     depends_on:
       db:
@@ -29,7 +29,7 @@ services:
       - "8000"
 
   frontend:
-    image: ${DOCKERHUB_USER}/railway_frontend_RomanovSV:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_USER}/railway_frontend_romanovsv:${IMAGE_TAG:-latest}
     container_name: railway_frontend_RomanovSV
     ports:
       - "${FRONTEND_PORT:-80}:80"

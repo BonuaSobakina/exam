@@ -33,7 +33,7 @@ docker compose up --build
 
 ## Docker Hub + prod
 
-Сборка помечает образы именами `railway_backend_RomanovSV` и `railway_frontend_RomanovSV`. Для публикации:
+Сборка помечает образы именами `railway_backend_romanovsv` и `railway_frontend_romanovsv` (Docker требует строчные имена репозиториев). Для публикации:
 
 ```bash
 export DOCKERHUB_USER=<ваш_логин>
