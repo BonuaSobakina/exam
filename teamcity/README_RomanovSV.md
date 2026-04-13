@@ -13,8 +13,9 @@
 Используйте **Command Line** build steps с рабочей директорией `%teamcity.build.checkoutDir%` (или корень репозитория).
 
 1. **Lint_RomanovSV** — установка зависимостей и линтеры:
-   - Backend: `pip install -r backend/requirements.txt && cd backend && PYTHONPATH=. python -m ruff check app`
+   - Backend: `pip install -r backend/requirements.txt && bash ci/lint_backend_RomanovSV.sh` (или `PYTHONPATH=backend python -m ruff check backend/app`)
    - Frontend: `cd frontend && npm ci && npm run lint`
+   - Либо одной командой: `bash ci/lint_RomanovSV.sh` (нужен `npm` и `npm install`/`npm ci` во frontend).
 2. **SAST_RomanovSV** — `pip install -r backend/requirements.txt && cd backend && python -m bandit -r app`
 3. **Test_RomanovSV** — `pip install -r backend/requirements.txt && cd backend && PYTHONPATH=. pytest -q && cd ../frontend && npm ci && npm run test`
 
